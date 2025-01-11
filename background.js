@@ -1,51 +1,122 @@
-// Handle list generation
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+/**
+ * Helper function to download data as a file
+ * @param {string} data - The content to be downloaded
+ * @param {string} filename - The name of the file to be created
+ */
+function downloadAsFile(data, filename) {
+  // Create a data URL containing the text
+  const dataUrl = 'data:application/json;charset=utf-8,' + encodeURIComponent(data);
+  
+  chrome.downloads.download({
+    url: dataUrl,
+    filename: filename
+  });
+}
+
+/**
+ * Main message listener for handling extension actions
+ */
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'generateURLList') {
-    // Query all tabs
-    chrome.tabs.query({}, function(tabs) {
-      // Extract URLs from all tabs
-      const urls = tabs.map(tab => tab.url);
-      // Join URLs with newlines
-      const textToWrite = urls.join('\n');
+    // Get all windows and their tabs
+    chrome.windows.getAll({ populate: true }, (windows) => {
+      const windowsData = windows.map(win => ({
+        focused: win.focused,
+        state: win.state,
+        tabs: win.tabs.map(tab => ({
+          url: tab.url,
+          active: tab.active,
+          pinned: tab.pinned,
+          title: tab.title
+        }))
+      }));
 
-      // Create a Blob (Binary Large Object) with the text content
-      const blob = new Blob([textToWrite], { type: 'text/plain' });
-      // Create a FileReader to read the Blob as a data URL
-      const reader = new FileReader();
-
-      // When FileReader finishes reading
-      reader.onloadend = function() {
-        // Get the data URL
-        const dataUrl = reader.result;
-
-        // Initiate download of the file
-        chrome.downloads.download({
-          url: dataUrl,
-          filename: 'tab_urls.txt',
-          saveAs: false  // This flag may prompt the browser to save without asking
-        });
+      const exportData = {
+        version: 1,
+        timestamp: new Date().toISOString(),
+        windows: windowsData
       };
 
-      // Start reading the Blob as a data URL
-      reader.readAsDataURL(blob);
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      downloadAsFile(JSON.stringify(exportData, null, 2), `tabs-backup-${timestamp}.json`);
+      sendResponse({ success: true });
     });
+    return true; // Will respond asynchronously
   }
-});
 
-// Listen for messages from content scripts
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-  if (request.action === 'downloadLargeImages') {
-    // Extract URLs of large images from the message
-    const largeImageUrls = request.urls;
-    // Initiate downloads for each large image URL
-    largeImageUrls.forEach(url => {
-      chrome.downloads.download({ url: url });
+  if (request.action === 'importTabs') {
+    const file = request.fileContent;
+    try {
+      const data = JSON.parse(file);
+      if (!data.version || !data.windows) {
+        throw new Error('Invalid file format');
+      }
+
+      // Create windows sequentially to ensure proper order
+      async function createWindows() {
+        for (const windowData of data.windows) {
+          try {
+            const urls = windowData.tabs.map(tab => tab.url);
+            
+            // Create window first without state
+            const createData = {
+              url: urls,
+              focused: windowData.focused
+            };
+
+            console.log('Creating window with data:', JSON.stringify(createData));
+            const window = await chrome.windows.create(createData);
+            
+            // Set window state after creation
+            const state = String(windowData.state).toLowerCase();
+            if (['minimized', 'maximized', 'normal'].includes(state)) {
+              console.log('Setting window state:', state);
+              await chrome.windows.update(window.id, { state: state });
+            }
+            
+            // Handle pinned tabs after window is created
+            for (let i = 0; i < windowData.tabs.length; i++) {
+              if (windowData.tabs[i].pinned) {
+                await chrome.tabs.update(window.tabs[i].id, { pinned: true });
+              }
+            }
+
+            // Set active tab after window is created
+            const activeTabIndex = windowData.tabs.findIndex(tab => tab.active);
+            if (activeTabIndex !== -1) {
+              await chrome.tabs.update(window.tabs[activeTabIndex].id, { active: true });
+            }
+          } catch (error) {
+            console.error('Error creating window:', error, windowData);
+          }
+        }
+      }
+
+      // Start the sequential window creation
+      createWindows().then(() => {
+        sendResponse({ success: true });
+      }).catch(error => {
+        console.error('Error in window creation:', error);
+        sendResponse({ success: false, error: error.message });
+      });
+    } catch (error) {
+      console.error('Error importing tabs:', error);
+      sendResponse({ success: false, error: error.message });
+    }
+    return true;
+  }
+  
+  if (request.action === 'copyUrls' && request.urls && Array.isArray(request.urls)) {
+    chrome.runtime.sendMessage({
+      action: "copyUrls",
+      urls: request.urls
     });
+    sendResponse({ success: true });
+    return false;
   }
 });
 
 // Listen for clicks on the extension icon
 chrome.action.onClicked.addListener((tab) => {
-  // This listener is kept empty as it previously referenced the tabs page
-  // It's here in case future functionality needs to be added for icon clicks
+  // This listener is kept empty as we use the popup
 });

@@ -10,48 +10,269 @@
   <!-- Main container for all buttons and inputs -->
   <div class="buttonList">
     <!-- First row of buttons -->
-    <div class="list-button-array">
+    <div class="list-button-array" role="toolbar" aria-label="Tab management tools">
       <!-- Button to group tabs by URL -->
-      <button id="groupTabs" style="width: 100%;">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-group"><path d="M3 7V5c0-1.1.9-2 2-2h2"/><path d="M17 3h2c1.1 0 2 .9 2 2v2"/><path d="M21 17v2c0 1.1-.9 2-2 2h-2"/><path d="M7 21H5c-1.1 0-2-.9-2-2v-2"/><rect width="7" height="5" x="7" y="7" rx="1"/><rect width="7" height="5" x="10" y="12" rx="1"/></svg>
-        Group tabs
+      <button id="groupTabs" style="width: 100%;" aria-label="Group tabs by domain">
+        <div class="button-content-wrapper">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-group"><path d="M3 7V5c0-1.1.9-2 2-2h2"/><path d="M17 3h2c1.1 0 2 .9 2 2v2"/><path d="M21 17v2c0 1.1-.9 2-2 2h-2"/><path d="M7 21H5c-1.1 0-2-.9-2-2v-2"/><rect width="7" height="5" x="7" y="7" rx="1"/><rect width="7" height="5" x="10" y="12" rx="1"/></svg>
+            <span>Group tabs</span>
+          </div>
+          <span class="keyboard-shortcut">G</span>
+        </div>
       </button>
       <!-- Button to randomize tab order -->
-      <button id="randomizeTabs">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dices"><rect width="12" height="12" x="2" y="10" rx="2" ry="2"/><path d="m17.92 14 3.5-3.5a2.24 2.24 0 0 0 0-3l-5-4.92a2.24 2.24 0 0 0-3 0L10 6"/><path d="M6 18h.01"/><path d="M10 14h.01"/><path d="M15 6h.01"/><path d="M18 9h.01"/></svg>
-        Randomise
+      <button id="randomizeTabs" class="icon-only" aria-label="Randomize tab order" title="Randomize tab order (R)">
+        <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dices"><rect width="12" height="12" x="2" y="10" rx="2" ry="2"/><path d="m17.92 14 3.5-3.5a2.24 2.24 0 0 0 0-3l-5-4.92a2.24 2.24 0 0 0-3 0L10 6"/><path d="M6 18h.01"/><path d="M10 14h.01"/><path d="M15 6h.01"/><path d="M18 9h.01"/></svg>
       </button>
     </div>
     
-    <!-- Button to close duplicate tabs -->
-    <button id="closeDuplicates">
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><path d="m9 9 6 6"/><path d="m15 9-6 6"/></svg>
-      Close duplicate tabs
-    </button>
-    <!-- Button to copy all tab URLs to clipboard -->
-    <button id="copyTabURLs">
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
-      Copy all tabs to clipboard
-    </button>
+    <!-- Container for Close Duplicate Tabs buttons -->
+    <div class="list-button-array" role="toolbar" aria-label="Duplicate tabs tools">
+      <button id="closeDuplicates" style="width: 100%;" aria-label="Close duplicate tabs">
+        <div class="button-content-wrapper">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><path d="m9 9 6 6"/><path d="m15 9-6 6"/></svg>
+            <span>Close duplicate tabs</span>
+          </div>
+          <span class="keyboard-shortcut">D</span>
+        </div>
+      </button>
+      <button id="closeSelectedDuplicates" class="icon-only" aria-label="Close selected tabs" title="Close selected tabs (F)">
+        <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 10c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2" stroke-opacity="0.3"/>
+          <path d="M10 16c-1.1 0-2-.9-2-2v-4c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2" stroke-opacity="0.3"/>
+          <rect width="8" height="8" x="14" y="14" rx="2"/>
+        </svg>
+      </button>
+    </div>
+    <!-- Container for Copy All/Selected Tabs buttons -->
+    <div class="list-button-array" role="toolbar" aria-label="Copy tabs tools">
+      <button id="copyTabURLs" style="width: 100%;" aria-label="Copy all tab URLs to clipboard">
+        <div class="button-content-wrapper">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 10c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2"/>
+              <path d="M10 16c-1.1 0-2-.9-2-2v-4c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2"/>
+              <rect width="8" height="8" x="14" y="14" rx="2"/>
+            </svg>
+            <span>Copy tabs</span>
+          </div>
+          <span class="keyboard-shortcut">A</span>
+        </div>
+      </button>
+      <button id="copySelectedTabs" class="icon-only" aria-label="Copy selected tabs to clipboard" title="Copy selected tabs (S)">
+        <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 10c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2" stroke-opacity="0.3"/>
+          <path d="M10 16c-1.1 0-2-.9-2-2v-4c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2" stroke-opacity="0.3"/>
+          <rect width="8" height="8" x="14" y="14" rx="2"/>
+        </svg>
+      </button>
+    </div>
+    <!-- Container for Copy All/Selected Tabs with Gallery DL buttons -->
+    <div class="list-button-array" role="toolbar" aria-label="Copy tabs + prepend">
+      <button id="copyTabURLsGallery" style="width: 100%;" aria-label="Copy tabs + prepend">
+        <div class="button-content-wrapper">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m7 11 2-2-2-2"/>
+              <path d="M11 13h4"/>
+              <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+            </svg>
+            <span>Copy tabs + prepend</span>
+          </div>
+          <span class="keyboard-shortcut">Q</span>
+        </div>
+      </button>
+      <button id="copySelectedTabsGallery" class="icon-only" aria-label="Copy selected tabs + prepend" title="Copy selected tabs + prepend (X)">
+        <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 10c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2" stroke-opacity="0.3"/>
+          <path d="M10 16c-1.1 0-2-.9-2-2v-4c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2" stroke-opacity="0.3"/>
+          <rect width="8" height="8" x="14" y="14" rx="2"/>
+        </svg>
+      </button>
+    </div>
+    <!-- Container for Save Session buttons -->
+    <div class="list-button-array" role="toolbar" aria-label="Session management tools">
+      <button id="saveSession" style="width: 100%;" aria-label="Save current window tabs">
+        <div class="button-content-wrapper">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            <span>Save session</span>
+          </div>
+          <span class="keyboard-shortcut">V</span>
+        </div>
+      </button>
+      <button id="showSessions" class="icon-only" aria-label="Show saved sessions" title="Show saved sessions (B)">
+        <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"/></svg>
+      </button>
+    </div>
     <!-- Button to download URL list from tabs -->
-    <button id="generate">
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-      Download tab URL list
-    </button>
+    <div class="list-button-array" role="toolbar" aria-label="Export/Import tools">
+      <button id="generate" style="width: 100%;" aria-label="Export all tabs and windows to JSON">
+        <div class="button-content-wrapper">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+            <span>Export all tabs</span>
+          </div>
+          <span class="keyboard-shortcut">E</span>
+        </div>
+      </button>
+      <button id="importTabs" class="icon-only" aria-label="Import tabs from JSON" title="Import tabs (I)">
+        <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" x2="12" y1="3" y2="15"/>
+        </svg>
+      </button>
+      <input type="file" id="fileInput" accept=".json" style="display: none;">
+    </div>
     <!-- Button to copy URLs in current tab -->
-    <button id="copyUrls">
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-link-2"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" x2="16" y1="12" y2="12"/></svg>
-      Copy all links
+    <button id="copyUrls" aria-label="Copy all links from current tab">
+      <div class="button-content-wrapper">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-link-2"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" x2="16" y1="12" y2="12"/></svg>
+          <span>Copy all links</span>
+        </div>
+        <span class="keyboard-shortcut">L</span>
+      </div>
     </button>
-  </div>
 
-  <!-- Textarea for user to input URLs -->
-  <textarea id="urlList" placeholder="Paste a list of URLs or any piece of text containing URLs to open them all at once."></textarea>
+    <!-- Settings button -->
+    <button id="showSettings" aria-label="Show settings">
+      <div class="button-content-wrapper">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+          <span>Settings</span>
+        </div>
+        <span class="keyboard-shortcut">P</span>
+      </div>
+    </button>
 
-  <!-- Container for URL opening buttons -->
-  <div class="buttonArray">
-    <button id="openUrls" class="a-c">Open here</button>
-    <button id="openUrlsInNewWindow" class="a-c f-w">Open in new window</button>
+    <!-- Settings overlay -->
+    <div id="settingsOverlay" class="overlay">
+      <div class="overlay-top-bar">
+        <button id="closeSettings" class="icon-only" aria-label="Back to main view">
+          <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div>
+          <div class="overlay-title">Settings</div>
+        </div>
+      </div>
+      <div class="settings-content">
+        <div class="settings-section">
+          <!-- <div class="settings-section-header">Button Rows</div> -->
+          <div class="setting-item">
+            <label class="setting-label">
+              <span>Copy + prepend</span>
+              <div class="toggle-switch">
+                <input type="checkbox" id="prependRowEnabled">
+                <span class="toggle-slider"></span>
+              </div>
+            </label>
+            <div class="setting-details" id="prependSettings" style="display: none;">
+              <input type="text" id="prependString" placeholder="Text to prepend..." maxlength="100" spellcheck="false">
+            </div>
+          </div>
+          <div class="setting-item">
+            <label class="setting-label">
+              <span>Copy links on page</span>
+              <div class="toggle-switch">
+                <input type="checkbox" id="copyLinksEnabled">
+                <span class="toggle-slider"></span>
+              </div>
+            </label>
+          </div>
+          <div class="setting-item">
+            <label class="setting-label">
+              <span>Open from URLs and text</span>
+              <div class="toggle-switch">
+                <input type="checkbox" id="urlInputEnabled">
+                <span class="toggle-slider"></span>
+              </div>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sessions overlay (hidden by default) -->
+    <div id="sessionsOverlay" class="overlay">
+      <div class="overlay-top-bar">
+        <button id="closeOverlay" class="icon-only" aria-label="Back to main view">
+          <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div>
+          <div class="overlay-title">Saved Sessions</div>
+          <div class="session-count-header"></div>
+        </div>
+      </div>
+      
+      <div id="sessionsList" class="sessions-list">
+        <!-- Sessions will be added here dynamically -->
+      </div>
+
+      <!-- Session management buttons -->
+      <div id="sessionManagement" class="session-management">
+        <div class="list-button-array" role="toolbar" aria-label="Session management tools">
+          <button id="exportSessions" aria-label="Export all sessions">
+            <div class="button-content-wrapper">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m8 17 4 4 4-4"/></svg>
+                <span>Export sessions</span>
+              </div>
+            </div>
+          </button>
+          <button id="importSessions" aria-label="Import sessions">
+            <div class="button-content-wrapper">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 21V12"/><path d="m8 16 4-4 4 4"/></svg>
+                <span>Import sessions</span>
+              </div>
+            </div>
+          </button>
+          <button id="clearSessions" aria-label="Clear all sessions" class="destructive">
+            <div class="button-content-wrapper">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                <span>Clear all</span>
+              </div>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Hidden file input for session import -->
+      <input type="file" id="sessionImportInput" accept=".json" style="display: none;">
+    </div>
+
+    <!-- URL Input Section -->
+    <div id="urlInputSection">
+      <!-- Textarea for user to input URLs -->
+      <textarea 
+        id="urlList" 
+        placeholder="Paste URLs or text containing URLs..."
+        aria-label="URL list input"
+        role="textbox"
+        aria-multiline="true"
+      ></textarea>
+
+      <!-- Container for URL opening buttons -->
+      <div class="buttonArray" role="toolbar" aria-label="URL opening options">
+        <button id="openUrls" class="a-c" aria-label="Open URLs in current window">
+          <div class="button-content-wrapper">
+            <span>Open</span>
+            <span class="keyboard-shortcut">O</span>
+          </div>
+        </button>
+        <button id="openUrlsInNewWindow" class="a-c f-w" aria-label="Open URLs in new window">
+          <div class="button-content-wrapper">
+            <span>New window</span>
+            <span class="keyboard-shortcut">N</span>
+          </div>
+        </button>
+      </div>
+    </div>
   </div>
 </body>
 </html>

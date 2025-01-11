@@ -45,35 +45,52 @@ table {
   border-spacing: 0;
 }
 
-/* Colours */
+/* Colour Variables */
 :root {
+  /* Base colors */
   --black: #000000;
   --white: #ffffff;
 
+  /* Light theme */
   --light-primary: #677FFF;
   --light-background: #ffffff;
   --light-surface: rgba(0, 0, 0, 0.05);
-  --light-onSurface: #ffffff;
+  --light-onSurface: #2c2c2c;
+  --light-onSurfaceSubdued: rgba(0, 0, 0, 0.5);
   --light-onSurfaceHover: rgba(0, 0, 0, 0.1);
   --light-onSurfaceActive: rgba(0, 0, 0, 0.15);
+  --light-onSurfaceSubtle: rgba(0, 0, 0, 0.1);
   --light-input: rgba(0, 0, 0, 0.2);
   --light-inputBorder: rgba(0, 0, 0, 0.15);
   --light-onInput: rgba(0, 0, 0, 0.75);
   --light-onInputSubdued: rgba(0, 0, 0, 0.5);
+  --light-error-background: #fff8f8;
+  --light-error-text: #dc3545;
+  --light-success-background: #f1fdf1;
+  --light-success-text: #28a745;
+  --light-toggle-background: rgba(0, 0, 0, 0.2);
 
+  /* Dark theme */
   --dark-primary: #339197;
   --dark-background: #202020;
   --dark-surface: rgba(255, 255, 255, 0.05);
-  --dark-onSurface: #ffffff;
+  --dark-onSurface: rgba(255, 255, 255, 0.9);
+  --dark-onSurfaceSubdued: rgba(255, 255, 255, 0.5);
   --dark-onSurfaceHover: rgba(255, 255, 255, 0.1);
-  --dark-onSurfaceActive: rgba(255, 255, 255, 0.2);
+  --dark-onSurfaceActive: rgba(255, 255, 255, 0.15);
+  --dark-onSurfaceSubtle: rgba(255, 255, 255, 0.1);
   --dark-input: rgba(0, 0, 0, 0.2);
   --dark-inputBorder: rgba(255, 255, 255, 0.15);
-  --dark-onInput: #ffffff;
+  --dark-onInput: rgba(255, 255, 255, 0.9);
   --dark-onInputSubdued: rgba(255, 255, 255, 0.5);
+  --dark-error-background: #350b0b;
+  --dark-error-text: #ff4444;
+  --dark-success-background: #0b350f;
+  --dark-success-text: #4dff77;
+  --dark-toggle-background: rgba(255, 255, 255, 0.2);
 }
 
-/* Popup background style */
+/* Base styles */
 body {
   background-color: var(--light-background);
   color: var(--light-onSurface);
@@ -87,19 +104,8 @@ body {
   align-items: flex-start;
   gap: 16px;
 }
-@media (prefers-color-scheme: dark) {
-  body {
-    background-color: var(--dark-background);
-    color: var(--dark-onSurface);
-  }
-}
 
-svg {
-  transform: translateX(-8px);
-  margin-right: -8px;
-}
-
-/* Styles for buttons */
+/* Button base styles */
 button {
   font-family: 'Inter', sans-serif;
   font-weight: 500;
@@ -110,42 +116,62 @@ button {
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  transition: background 0.3s ease, filter 0.1s;
+  transition: background-color 0.3s ease-in-out, 
+              outline 0.3s ease-in-out;
   display: flex;
-  padding: 8px 16px 8px 16px;
+  padding: 8px 16px;
   align-items: center;
   gap: 8px;
   align-self: stretch;
   line-height: 24px;
 }
 
-@media (prefers-color-scheme: dark) {
-  button {
-    background-color: var(--dark-surface);
-    color: var(--dark-onSurface);
-  }
+/* Button content transitions */
+.button-content-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-/* Hover state for button */
+/* Ensure SVG and text transition smoothly */
+.button-content-wrapper svg,
+.button-content-wrapper span {
+  transition: transform 0.3s ease-in-out, 
+              opacity 0.3s ease-in-out,
+              color 0.3s ease-in-out;
+}
+
+/* Button states */
 button:hover {
   background-color: var(--light-onSurfaceHover);
 }
-@media (prefers-color-scheme: dark) {
-  button:hover {
-    background-color: var(--dark-onSurfaceHover);
-  }
-}
 
-/* Active state for button */
 button:active {
   background-color: var(--light-onSurfaceActive);
 }
-@media (prefers-color-scheme: dark) {
-  button:active {
-    background-color: var(--dark-onSurfaceActive);
-  }
+
+/* Button variants */
+.text-only {
+  padding: 8px 16px;
+  justify-content: center;
 }
 
+.icon-only {
+  width: 40px;
+  height: 40px;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.icon-only svg {
+  transform: none;
+  margin: 0;
+}
+
+/* Button alignment utilities */
 .a-c {
   text-align: center;
   justify-content: center;
@@ -162,7 +188,7 @@ button:active {
   flex-grow: 1;
 }
 
-/* Style for text areas */
+/* Textarea styles */
 textarea {
   width: calc(100% - 14px);
   max-width: calc(100% - 14px);
@@ -173,70 +199,98 @@ textarea {
   background-color: var(--light-input);
   color: var(--light-onInput);
   border: 1px dashed var(--light-inputBorder);
-    transition: border 0.3s ease;
+  transition: border-color 0.3s ease-in-out, 
+              outline 0.3s ease-in-out,
+              background-color 0.3s ease-in-out;
   outline: none;
-    transition: outline 0.3s ease;
+  line-height: 1.5;
+  resize: vertical;
 }
-@media (prefers-color-scheme: dark) {
-  textarea {
-    border-color: var(--dark-inputBorder);
-    background-color: var(--dark-input);
-    color: var(--dark-onInput);
-  }
-}
-textarea:focus { 
-  outline: none;
+
+/* Focus states */
+textarea.focused,
+textarea:focus-visible {
   outline: 2px solid var(--light-primary);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(33, 150, 243, 0.2);
+  border-style: solid;
 }
-@media (prefers-color-scheme: dark) {
-  textarea:focus {
-    outline: none;
-    outline: 2px solid var(--dark-primary);
+
+.icon-only:focus-visible {
+  outline-offset: 0;
+}
+
+/* Remove outline when using mouse */
+button:focus:not(:focus-visible),
+textarea:focus:not(:focus-visible) {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Error and success states */
+button.error {
+  background-color: var(--light-error-background);
+  color: var(--light-error-text);
+  transition: background-color 0.3s ease,
+              color 0.3s ease;
+}
+
+button.success {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--light-surface);
+  color: var(--light-success-text);
+  transition: color 0.2s ease;
+}
+
+button.success::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--light-success-background);
+  transform-origin: left;
+  animation: loadSuccess 1.5s ease-in-out;
+  z-index: -1;
+}
+
+/* Success animation */
+@keyframes loadSuccess {
+  0% {
+    transform: scaleX(0);
+  }
+  100% {
+    transform: scaleX(1);
   }
 }
 
-/* Style for headings */
-h2 {
-  font-size: 16px;
-  line-height: 24px;
-  margin: 0px;
-  margin-bottom: 8px;
-  padding: 0px;
+/* Success state with morphing transition */
+button.success .button-content-wrapper {
+  color: var(--light-success-text);
+  transition: color 0.3s ease-in-out;
 }
 
-p {
-  color: var(--light-onSurface);
-  margin: 0px;
-  padding: 0px;
-}
 @media (prefers-color-scheme: dark) {
-  p {
-    color: var(--dark-onSurface);
+  button.success .button-content-wrapper {
+    color: var(--dark-success-text);
   }
 }
 
-.small {
-  color: var(--light-onSurfaceSubdued);
-  font-size: 12px;
-  line-height: 16px;
+/* Error state with morphing transition */
+button.error .button-content-wrapper {
+  color: var(--light-error-text);
+  transition: color 0.3s ease-in-out;
 }
+
 @media (prefers-color-scheme: dark) {
-  .small {
-    color: var(--dark-onSurfaceSubdued);
+  button.error .button-content-wrapper {
+    color: var(--dark-error-text);
   }
 }
 
-.divider {
-  background-color: var(--light-onSurfaceSubtle);
-  height: 1px;
-  margin: 16px 0px;
-}
-@media (prefers-color-scheme: dark) {
-  .divider {
-    color: var(--dark-onSurfaceSubtle);
-  }
-}
-
+/* Layout components */
 .buttonArray {
   display: flex;
   align-items: flex-end;
@@ -261,6 +315,926 @@ p {
   width: 100%;
 }
 
+/* Typography */
+.small {
+  color: var(--light-onSurfaceSubdued);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+/* Divider */
+.divider {
+  background-color: var(--light-onSurfaceSubtle);
+  height: 1px;
+  margin: 16px 0;
+}
+
+/* Icon styles */
+button svg {
+  stroke: currentColor;
+  transform: none;
+  margin: 0;
+  transition: stroke 0.3s ease-in-out;
+}
+
+/* Hide scrollbar */
 ::-webkit-scrollbar {
   display: none;
+}
+
+/* Dark mode overrides */
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: var(--dark-background);
+    color: var(--dark-onSurface);
+  }
+
+  button {
+    background-color: var(--dark-surface);
+    color: var(--dark-onSurface);
+  }
+
+  button:hover {
+    background-color: var(--dark-onSurfaceHover);
+  }
+
+  button:active {
+    background-color: var(--dark-onSurfaceActive);
+  }
+
+  button:focus-visible {
+    outline-color: var(--dark-primary);
+  }
+
+  button.error {
+    background-color: var(--dark-error-background);
+    color: var(--dark-error-text);
+  }
+
+  button.success {
+    background-color: var(--dark-surface);
+    color: var(--dark-success-text);
+  }
+
+  button.success::before {
+    background-color: var(--dark-success-background);
+  }
+
+  textarea {
+    background-color: var(--dark-input);
+    color: var(--dark-onInput);
+    border-color: var(--dark-inputBorder);
+  }
+
+  textarea.focused,
+  textarea:focus-visible {
+    outline-color: var(--dark-primary);
+    border-color: var(--dark-primary);
+  }
+
+  .small {
+    color: var(--dark-onSurfaceSubdued);
+  }
+
+  .divider {
+    background-color: var(--dark-onSurfaceSubtle);
+  }
+}
+
+/* High contrast mode support */
+@media (forced-colors: active) {
+  button:focus-visible,
+  textarea:focus-visible {
+    outline: 3px solid CanvasText;
+  }
+  
+  button svg {
+    forced-color-adjust: auto;
+  }
+}
+
+/* Success state transitions */
+button.success span,
+button.success svg {
+  transition: opacity 0.2s ease;
+}
+
+/* Error state transitions */
+button.error span,
+button.error svg {
+  transition: opacity 0.2s ease;
+}
+
+/* Keyboard focus styles */
+*:focus-visible {
+  outline: 2px solid var(--light-primary);
+  outline-offset: 2px;
+}
+
+@media (prefers-color-scheme: dark) {
+  *:focus-visible {
+    outline-color: var(--dark-primary);
+  }
+}
+
+/* High contrast mode support */
+@media (forced-colors: active) {
+  *:focus-visible {
+    outline: 3px solid CanvasText;
+  }
+  
+  button svg {
+    forced-color-adjust: auto;
+  }
+}
+
+/* Keyboard shortcut indicator */
+.keyboard-shortcut {
+  margin-left: auto;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--light-surface);
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--light-onSurfaceSubdued);
+  border: 1px solid var(--light-inputBorder);
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+@media (prefers-color-scheme: dark) {
+  .keyboard-shortcut {
+    background-color: var(--dark-surface);
+    color: var(--dark-onSurfaceSubdued);
+    border-color: var(--dark-inputBorder);
+  }
+}
+
+/* Adjust button content layout */
+button {
+  justify-content: flex-start;
+  padding-right: 12px;
+  min-height: 40px;
+}
+
+.button-content-wrapper {
+  flex: 1;
+  justify-content: space-between;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+
+/* Left side of button content */
+.button-content-wrapper > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Make sure icon-only button keeps its layout */
+.icon-only {
+  width: 40px;
+  height: 40px;
+  padding: 8px;
+  justify-content: center;
+  position: relative;
+}
+
+.icon-only .keyboard-shortcut {
+  position: absolute;
+  right: -24px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  width: 14px;
+  height: 14px;
+  font-size: 10px;
+}
+
+button.icon-only {
+  padding: 8px;
+  min-width: unset;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  position: relative;
+}
+
+button.icon-only:active {
+  transform: scale(0.95);
+}
+
+button.icon-only svg {
+  transition: transform 0.2s ease;
+}
+
+button.icon-only.success svg,
+button.icon-only.error svg {
+  animation: popIn 0.2s ease;
+}
+
+@keyframes popIn {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Remove dark mode overrides since we want consistent black/white tooltips */
+@media (prefers-color-scheme: dark) {
+  button.icon-only:hover::after {
+    background-color: #000000;
+    color: #ffffff;
+  }
+
+  button.icon-only:hover::before {
+    border-left-color: #000000;
+  }
+}
+
+/* Overlay styles */
+.overlay {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 100%;
+  height: 100%;
+  background-color: var(--light-background);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.overlay.visible {
+  right: 0;
+}
+
+.overlay-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid var(--light-inputBorder);
+  font-weight: 500;
+}
+
+.sessions-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.session-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  border-radius: 4px;
+  background-color: var(--light-surface);
+  margin-bottom: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.session-item:hover {
+  background-color: var(--light-onSurfaceHover);
+}
+
+.session-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 20px;
+  gap: 2px;
+  width: 100%;
+  -webkit-user-select: none;
+  user-select: none;
+  position: relative;
+}
+
+.session-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  line-height: 20px;
+}
+
+.session-date {
+  font-weight: 500;
+  line-height: 20px;
+  outline: none;
+  flex: 1;
+  min-width: 0;
+  margin-right: 12px;
+}
+
+.session-timestamp {
+  font-weight: 500;
+  color: var(--light-onSurfaceSubdued);
+  font-size: 12px;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
+@media (prefers-color-scheme: dark) {
+  .session-timestamp {
+    color: var(--dark-onSurfaceSubdued);
+  }
+}
+
+.session-count {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--light-onSurfaceSubdued);
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+
+.session-actions {
+  display: flex;
+  font-size: 12px;
+  line-height: 16px;
+  gap: 12px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+}
+
+.session-actions-left {
+  display: flex;
+  gap: 12px;
+}
+
+.session-actions-right {
+  margin-left: auto;
+  display: flex;
+  gap: 12px;
+}
+
+.session-actions a {
+  font-weight: 500;
+  color: var(--light-onSurface);
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.session-actions a.remove-session {
+  color: var(--light-error-text);
+}
+
+.session-actions a:hover {
+  opacity: 0.7;
+}
+
+.session-actions .confirm-text {
+  color: var(--light-onSurfaceSubdued);
+  margin-right: auto;
+}
+
+.session-actions .feedback-text {
+  color: var(--light-success-text);
+}
+
+.session-item:hover .session-count {
+  opacity: 0;
+}
+
+.session-item:hover .session-actions {
+  opacity: 1;
+}
+
+.delete-session {
+  padding: 8px;
+  border-radius: 4px;
+  color: var(--light-error-text);
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.delete-session:hover {
+  opacity: 1;
+}
+
+/* Dark mode styles */
+@media (prefers-color-scheme: dark) {
+  .overlay {
+    background-color: var(--dark-background);
+  }
+
+  .overlay-header {
+    border-bottom-color: var(--dark-inputBorder);
+  }
+
+  .session-item {
+    background-color: var(--dark-surface);
+  }
+
+  .session-item:hover {
+    background-color: var(--dark-onSurfaceHover);
+  }
+
+  .session-count {
+    color: var(--dark-onSurfaceSubdued);
+  }
+
+  .delete-session {
+    color: var(--dark-error-text);
+  }
+}
+
+.overlay-title {
+  display: flex;
+  flex-direction: column;
+  gap: 0px;
+  font-weight: 500;
+}
+
+.session-count-header {
+  font-size: 12px;
+  line-height: 20px;
+  color: var(--light-onSurfaceSubdued);
+  font-weight: normal;
+}
+
+@media (prefers-color-scheme: dark) {
+  .session-count-header {
+    color: var(--dark-onSurfaceSubdued);
+  }
+}
+
+.overlay-top-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid var(--light-inputBorder);
+}
+
+.overlay-title {
+  font-weight: 500;
+  line-height: 20px;
+}
+
+.session-count-header {
+  font-size: 12px;
+  line-height: 20px;
+  color: var(--light-onSurfaceSubdued);
+  font-weight: normal;
+}
+
+@media (prefers-color-scheme: dark) {
+  .overlay-top-bar {
+    border-bottom-color: var(--dark-inputBorder);
+  }
+
+  .session-count-header {
+    color: var(--dark-onSurfaceSubdued);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .session-count {
+    color: var(--dark-onSurfaceSubdued);
+  }
+  
+  .session-actions a {
+    color: var(--dark-onSurface);
+  }
+  
+  .session-actions a.remove-session {
+    color: var(--dark-error-text);
+  }
+
+  .session-actions .confirm-text {
+    color: var(--dark-onSurfaceSubdued);
+  }
+
+  .session-actions .feedback-text {
+    color: var(--dark-success-text);
+  }
+}
+
+/* Settings styles */
+.settings-content {
+  padding: 16px;
+}
+
+.settings-section:not(:last-child) {
+  margin-bottom: 24px;
+}
+
+.settings-section-header {
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--light-onSurfaceSubdued);
+  margin-bottom: 12px;
+}
+
+.setting-item {
+  margin-bottom: 16px;
+}
+
+.setting-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.setting-details {
+  margin-top: 8px;
+  padding-left: 0;
+  padding-right: 16px;
+}
+
+.setting-details input[type="text"] {
+  width: 100%;
+  padding: 8px 8px;
+  border: 1px solid var(--light-inputBorder);
+  border-radius: 6px;
+  background: var(--light-surface);
+  color: var(--light-onInput);
+  font-family: 'Inter', sans-serif;
+  resize: none;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.setting-details input[type="text"]::placeholder {
+  color: var(--light-onInputSubdued);
+}
+
+.setting-details input[type="text"]:focus {
+  outline: none;
+  border-color: var(--light-primary);
+}
+
+/* Dark mode styles */
+@media (prefers-color-scheme: dark) {
+  .setting-details input[type="text"] {
+    border-color: var(--dark-inputBorder);
+    background: var(--dark-surface);
+    color: var(--dark-onSurface);
+  }
+
+  .setting-details input[type="text"]::placeholder {
+    color: var(--dark-onInputSubdued);
+  }
+
+  .setting-details input[type="text"]:focus {
+    border-color: var(--dark-primary);
+  }
+}
+
+/* Toggle switch */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 20px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--light-toggle-background);
+  transition: .2s;
+  border-radius: 20px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: .2s;
+  border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+  background-color: var(--light-primary);
+}
+
+input:checked + .toggle-slider:before {
+  transform: translateX(16px);
+}
+
+/* Dark mode styles */
+@media (prefers-color-scheme: dark) {
+  .settings-section-header {
+    color: var(--dark-onSurfaceSubdued);
+  }
+
+  .setting-details input[type="text"] {
+    border-color: var(--dark-inputBorder);
+    background: var(--dark-surface);
+    color: var(--dark-onSurface);
+  }
+
+  .setting-details input[type="text"]:focus {
+    border-color: var(--dark-primary);
+  }
+
+  .toggle-slider {
+    background-color: var(--dark-toggle-background);
+  }
+
+  input:checked + .toggle-slider {
+    background-color: var(--dark-primary);
+  }
+}
+
+
+#urlInputSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  padding-top: 8px;
+}
+
+#urlList {
+  width: 100%;
+  height: 72px;
+  min-height: 72px;
+  resize: none;
+  padding: 4px 8px;
+  border: 1px solid var(--light-inputBorder);
+  border-radius: 6px;
+  background: var(--light-surface);
+  color: var(--light-onInput);
+  font-family: 'Inter', sans-serif;
+  transition: border-color 0.2s ease;
+  line-height: 24px;
+}
+
+#urlList:focus {
+  outline: none;
+  border-color: var(--light-primary);
+}
+
+/* Dark mode styles */
+@media (prefers-color-scheme: dark) {
+  #urlList {
+    border-color: var(--dark-inputBorder);
+    background: var(--dark-surface);
+    color: var(--dark-onSurface);
+  }
+
+  #urlList:focus {
+    border-color: var(--dark-primary);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .session-date[contenteditable="true"] {
+    caret-color: var(--dark-primary);
+  }
+  
+  .session-date[contenteditable="true"].placeholder {
+    color: var(--dark-onSurfaceSubdued);
+  }
+}
+
+.session-tab-count {
+  font-weight: 500;
+  color: var(--light-onSurfaceSubdued);
+  font-size: 12px;
+  line-height: 16px;
+  white-space: nowrap;
+  margin-left: 2px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .session-tab-count {
+    color: var(--dark-onSurfaceSubdued);
+  }
+}
+
+.session-management {
+  padding: 0px;
+  padding-top: 0px;
+  margin-top: 0px;
+}
+
+.session-management .list-button-array {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.session-management button {
+  width: 100% !important;
+  background-color: var(--light-surface);
+  margin-bottom: 4px;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.session-management button:hover {
+  background-color: var(--light-onSurfaceHover);
+}
+
+.session-management button:active {
+  background-color: var(--light-onSurfaceActive);
+}
+
+.session-management button:last-child {
+  margin-bottom: 0;
+}
+
+/* Hide session management when no sessions */
+.session-management:empty {
+  display: none;
+}
+
+/* Destructive button styles */
+button.destructive {
+  color: var(--light-error-text);
+}
+
+button.destructive:hover {
+  background-color: var(--light-error-background);
+}
+
+@media (prefers-color-scheme: dark) {
+  .session-management button {
+    background-color: var(--dark-surface);
+  }
+
+  button.destructive {
+    color: var(--dark-error-text);
+  }
+
+  button.destructive:hover {
+    background-color: var(--dark-error-background);
+  }
+}
+
+/* Confirmation state for clear all button */
+button.destructive.confirming {
+  background-color: var(--light-error-background);
+}
+
+@media (prefers-color-scheme: dark) {
+  button.destructive.confirming {
+    background-color: var(--dark-error-background);
+  }
+}
+
+.sessions-list .session-management button {
+  width: 100% !important;
+  background-color: var(--light-surface);
+  margin-bottom: 4px;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.sessions-list .session-management button:hover {
+  background-color: var(--light-onSurfaceHover);
+}
+
+.sessions-list .session-management button:active {
+  background-color: var(--light-onSurfaceActive);
+}
+
+@media (prefers-color-scheme: dark) {
+  .sessions-list .session-management button {
+    background-color: var(--dark-surface);
+  }
+
+  .sessions-list .session-management button:hover {
+    background-color: var(--dark-onSurfaceHover);
+  }
+
+  .sessions-list .session-management button:active {
+    background-color: var(--dark-onSurfaceActive);
+  }
+}
+
+/* Multi-stage button styles */
+.multi-stage-button {
+  position: relative;
+  overflow: hidden;
+  color: var(--light-error-text);
+}
+
+.multi-stage-button svg {
+  color: var(--light-error-text);
+}
+
+/* Success state - centered */
+.multi-stage-button.success .button-content-wrapper {
+  justify-content: center;
+}
+
+/* Confirmation state - right aligned with gap */
+.multi-stage-button.confirming .button-content-wrapper {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  width: 100%;
+}
+
+.multi-stage-button.confirming {
+  color: var(--light-onSurface);
+}
+
+.multi-stage-button.confirming svg,
+.multi-stage-button.confirming .stage-message-text {
+  color: var(--light-onSurface);
+}
+
+.multi-stage-button.confirming .button-content-wrapper > div {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.multi-stage-button.confirming .stage-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: auto;
+}
+
+.multi-stage-button.confirming .stage-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.multi-stage-button.confirming .stage-action {
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.multi-stage-button.confirming .stage-action.confirm {
+  color: var(--light-error-text);
+}
+
+.multi-stage-button.confirming .stage-action.cancel {
+  color: var(--light-onSurface);
+}
+
+/* Dark mode styles */
+@media (prefers-color-scheme: dark) {
+  .multi-stage-button {
+    color: var(--dark-error-text);
+  }
+
+  .multi-stage-button svg {
+    color: var(--dark-error-text);
+  }
+
+  .multi-stage-button.confirming {
+    color: var(--dark-onSurface);
+  }
+
+  .multi-stage-button.confirming svg,
+  .multi-stage-button.confirming .stage-message-text {
+    color: var(--dark-onSurface);
+  }
+
+  .multi-stage-button.confirming .stage-action.confirm {
+    color: var(--dark-error-text);
+  }
+
+  .multi-stage-button.confirming .stage-action.cancel {
+    color: var(--dark-onSurface);
+  }
 }
