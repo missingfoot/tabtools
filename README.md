@@ -1,4 +1,4 @@
-# Tab Tools V3
+# Tab Tools
 
 A powerful Chrome extension for advanced tab management and organization.
 
@@ -88,7 +88,7 @@ A powerful Chrome extension for advanced tab management and organization.
 Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
-Copyright (c) 2024 [Your Name]. All rights reserved.
+Copyright (c) 2025 James Sparkes. All rights reserved.
 
 This software and associated documentation files (the "Software") are proprietary and confidential. 
 The source code is provided for reference only.
