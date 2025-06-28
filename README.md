@@ -78,8 +78,10 @@ A powerful Chrome extension for advanced tab management and organization.
 - Chrome Extensions enabled
 
 ## Installation
-1. Download the extension
-2. Open Chrome Extensions page (chrome://extensions/)
-3. Enable Developer Mode
-4. Load unpacked extension
-5. Select the extension directory
+1. Go to the [releases page](https://github.com/your-repo/releases)
+2. Download the latest source zip file
+3. Extract the zip file to a directory
+4. Open Chrome Extensions page (chrome://extensions/)
+5. Enable Developer Mode
+6. Load unpacked extension
+7. Select the extracted extension directory
