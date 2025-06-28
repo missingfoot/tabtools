@@ -78,7 +78,7 @@ A powerful Chrome extension for advanced tab management and organization.
 - Chrome Extensions enabled
 
 ## Installation
-1. Go to the [releases page](https://github.com/your-repo/releases)
+1. Go to the [releases page](https://github.com/missingfoot/tabtools/releases)
 2. Download the latest source zip file
 3. Extract the zip file to a directory
 4. Open Chrome Extensions page (chrome://extensions/)
