@@ -99,10 +99,11 @@ body {
   font-size: 14px;
   line-height: 24px;
   display: flex;
-  padding: 16px;
+  padding: 12px;
   flex-direction: column;
   align-items: flex-start;
   gap: 16px;
+  min-height: 106px;
 }
 
 /* Button base styles */
@@ -294,7 +295,7 @@ button.error .button-content-wrapper {
 .buttonArray {
   display: flex;
   align-items: flex-end;
-  gap: 16px;
+  gap: 8px;
   align-self: stretch;
 }
 
@@ -838,6 +839,7 @@ button.icon-only.error svg {
 /* Settings styles */
 .settings-content {
   padding: 16px;
+  overflow: scroll;
 }
 
 .settings-section:not(:last-child) {
@@ -985,9 +987,8 @@ input:checked + .toggle-slider:before {
 #urlInputSection {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 8px;
   width: 100%;
-  padding-top: 8px;
 }
 
 #urlList {
@@ -1236,5 +1237,137 @@ button.destructive.confirming {
 
   .multi-stage-button.confirming .stage-action.cancel {
     color: var(--dark-onSurface);
+  }
+}
+
+/* Windows list styles */
+.windows-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.window-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  border-radius: 4px;
+  background-color: var(--light-surface);
+  margin-bottom: 8px;
+  transition: background-color 0.2s ease;
+  cursor: pointer;
+}
+
+.window-item:hover {
+  background-color: var(--light-onSurfaceHover);
+}
+
+.window-item.current-window {
+  position: relative;
+  background-color: var(--light-surface);
+  color: var(--light-onSurface);
+  overflow: hidden;
+}
+
+.window-item.current-window::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: var(--light-primary);
+  border-radius: 0;
+  z-index: 1;
+}
+
+.window-item.current-window:hover {
+  background-color: var(--light-onSurfaceHover);
+}
+
+.window-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 20px;
+  gap: 2px;
+  width: 100%;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.window-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  line-height: 20px;
+}
+
+.window-title {
+  font-weight: 500;
+  line-height: 20px;
+  flex: 1;
+  min-width: 0;
+}
+
+.window-tab-count {
+  font-weight: 500;
+  color: var(--light-onSurfaceSubdued);
+  font-size: 12px;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
+.window-count {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--light-onSurfaceSubdued);
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.window-count-header {
+  font-size: 12px;
+  line-height: 20px;
+  color: var(--light-onSurfaceSubdued);
+  font-weight: normal;
+}
+
+/* Dark mode styles for windows */
+@media (prefers-color-scheme: dark) {
+  .window-item {
+    background-color: var(--dark-surface);
+  }
+
+  .window-item:hover {
+    background-color: var(--dark-onSurfaceHover);
+  }
+
+  .window-item.current-window {
+    background-color: var(--dark-surface);
+    color: var(--dark-onSurface);
+  }
+
+  .window-item.current-window::before {
+    background-color: var(--dark-primary);
+  }
+
+  .window-item.current-window:hover {
+    background-color: var(--dark-onSurfaceHover);
+  }
+
+  .window-tab-count {
+    color: var(--dark-onSurfaceSubdued);
+  }
+
+  .window-count {
+    color: var(--dark-onSurfaceSubdued);
+  }
+
+  .window-count-header {
+    color: var(--dark-onSurfaceSubdued);
   }
 }

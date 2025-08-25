@@ -941,6 +941,162 @@ function hideSessionsOverlay() {
   overlay.classList.remove('visible');
 }
 
+/**
+ * Shows the move tabs to window overlay
+ */
+async function showMoveTabsOverlay() {
+  const overlay = document.getElementById('moveTabsOverlay');
+  const windowsList = document.getElementById('windowsList');
+  const currentWindow = await chrome.windows.getCurrent();
+
+  try {
+    // Get all windows with their tabs
+    const windows = await chrome.windows.getAll({ populate: true });
+
+    // Update window count in header
+    const countText = windows.length === 1 ? '1 window' : `${windows.length} windows`;
+    document.querySelector('.window-count-header').textContent = countText;
+
+    // Clear existing list
+    windowsList.innerHTML = '';
+
+    // Add windows to list
+    windows.forEach((window, index) => {
+      const topDomains = getTopDomainsFromWindow(window.tabs);
+      const isCurrentWindow = window.id === currentWindow.id;
+
+      const windowItem = document.createElement('div');
+      windowItem.className = `window-item ${isCurrentWindow ? 'current-window' : ''}`;
+      windowItem.dataset.windowId = window.id;
+
+      windowItem.innerHTML = `
+        <div class="window-info">
+          <div class="window-header">
+            <div class="window-title">Window ${index + 1}${isCurrentWindow ? ' (Current)' : ''}</div>
+            <div class="window-tab-count">${window.tabs.length} tabs</div>
+          </div>
+          <div class="window-count">${topDomains || 'No domains'}</div>
+        </div>
+      `;
+
+      // Add click handler
+      windowItem.addEventListener('click', () => {
+        moveTabsToWindow(window.id);
+      });
+
+      windowsList.appendChild(windowItem);
+    });
+
+    // Show overlay with animation
+    requestAnimationFrame(() => {
+      overlay.classList.add('visible');
+    });
+  } catch (error) {
+    console.error('Error showing move tabs overlay:', error);
+    await handleError(error, 'moveTabsToWindow', 'Failed to load windows');
+  }
+}
+
+/**
+ * Hides the move tabs overlay
+ */
+function hideMoveTabsOverlay() {
+  const overlay = document.getElementById('moveTabsOverlay');
+  overlay.classList.remove('visible');
+}
+
+/**
+ * Gets top domains from window tabs
+ */
+function getTopDomainsFromWindow(tabs) {
+  const CHAR_LIMIT = 48;
+
+  // Count domain occurrences
+  const domainCounts = {};
+  tabs.forEach(tab => {
+    try {
+      const url = new URL(tab.url);
+      let parts = url.hostname.replace(/^www\./, '').split('.');
+
+      // Handle special cases like .co.uk, .com.au, etc.
+      let domain;
+      if (parts.length > 2 && parts[parts.length - 2] === 'co') {
+        domain = parts.slice(-3).join('.');
+      } else {
+        domain = parts.slice(-2).join('.');
+      }
+
+      domainCounts[domain] = (domainCounts[domain] || 0) + 1;
+    } catch {
+      // Skip invalid URLs
+    }
+  });
+
+  // Convert to array and sort by count
+  const sortedDomains = Object.entries(domainCounts)
+    .sort(([,a], [,b]) => b - a)
+    .map(([domain]) => domain);
+
+  // Build the domain list with intelligent truncation
+  const domains = [];
+  let totalLength = 0;
+
+  for (const domain of sortedDomains) {
+    const addedLength = domains.length === 0 ? domain.length : domain.length + 2;
+
+    if (totalLength + addedLength > CHAR_LIMIT) {
+      break;
+    }
+
+    domains.push(domain);
+    totalLength += addedLength;
+  }
+
+  if (domains.length === 0) {
+    return 'No domains';
+  }
+
+  const result = domains.length < sortedDomains.length ? domains.join(', ') + '...' : domains.join(', ');
+  return result;
+}
+
+/**
+ * Moves selected tabs to the specified window
+ */
+async function moveTabsToWindow(targetWindowId) {
+  try {
+    // Get highlighted/selected tabs
+    const highlightedTabs = await chrome.tabs.query({ highlighted: true, currentWindow: true });
+
+    // If no tabs are selected, use the current active tab
+    const tabsToMove = highlightedTabs.length > 1 ? highlightedTabs : await chrome.tabs.query({ active: true, currentWindow: true });
+
+    if (tabsToMove.length === 0) {
+      await showButtonFeedback('moveTabsToWindow', 'No tabs to move', true);
+      return;
+    }
+
+    // Move tabs to target window
+    const movePromises = tabsToMove.map(tab =>
+      chrome.tabs.move(tab.id, { windowId: targetWindowId, index: -1 })
+    );
+
+    await Promise.all(movePromises);
+
+    // Show success feedback
+    const tabCount = tabsToMove.length;
+    const feedbackText = tabCount === 1 ? 'Tab moved' : `${tabCount} tabs moved`;
+    await showButtonFeedback('moveTabsToWindow', feedbackText);
+
+    // Hide overlay
+    hideMoveTabsOverlay();
+
+  } catch (error) {
+    console.error('Error moving tabs to window:', error);
+    await handleError(error, 'moveTabsToWindow', 'Failed to move tabs');
+  }
+}
+
 // Initialize settings with default values
 const defaultSettings = {
   rows: {
@@ -955,6 +1111,24 @@ const defaultSettings = {
     },
     copyLinks: {
       enabled: false
+    },
+    groupTabs: {
+      enabled: true
+    },
+    closeDuplicates: {
+      enabled: true
+    },
+    copyTabs: {
+      enabled: true
+    },
+    saveSession: {
+      enabled: true
+    },
+    exportImport: {
+      enabled: true
+    },
+    moveTabsToWindow: {
+      enabled: true
     }
   }
 };
@@ -982,6 +1156,24 @@ async function loadSettings() {
           },
           copyLinks: {
             enabled: result.settings.rows?.copyLinks?.enabled ?? defaultSettings.rows.copyLinks.enabled
+          },
+          groupTabs: {
+            enabled: result.settings.rows?.groupTabs?.enabled ?? defaultSettings.rows.groupTabs.enabled
+          },
+          closeDuplicates: {
+            enabled: result.settings.rows?.closeDuplicates?.enabled ?? defaultSettings.rows.closeDuplicates.enabled
+          },
+          copyTabs: {
+            enabled: result.settings.rows?.copyTabs?.enabled ?? defaultSettings.rows.copyTabs.enabled
+          },
+          saveSession: {
+            enabled: result.settings.rows?.saveSession?.enabled ?? defaultSettings.rows.saveSession.enabled
+          },
+          exportImport: {
+            enabled: result.settings.rows?.exportImport?.enabled ?? defaultSettings.rows.exportImport.enabled
+          },
+          moveTabsToWindow: {
+            enabled: result.settings.rows?.moveTabsToWindow?.enabled ?? defaultSettings.rows.moveTabsToWindow.enabled
           }
         }
       };
@@ -991,6 +1183,12 @@ async function loadSettings() {
     document.getElementById('prependRowEnabled').checked = settings.rows.prepend.enabled;
     document.getElementById('urlInputEnabled').checked = settings.rows.urlInput.enabled;
     document.getElementById('copyLinksEnabled').checked = settings.rows.copyLinks.enabled;
+    document.getElementById('groupTabsEnabled').checked = settings.rows.groupTabs.enabled;
+    document.getElementById('closeDuplicatesEnabled').checked = settings.rows.closeDuplicates.enabled;
+    document.getElementById('copyTabsEnabled').checked = settings.rows.copyTabs.enabled;
+    document.getElementById('saveSessionEnabled').checked = settings.rows.saveSession.enabled;
+    document.getElementById('exportImportEnabled').checked = settings.rows.exportImport.enabled;
+    document.getElementById('moveTabsToWindowEnabled').checked = settings.rows.moveTabsToWindow.enabled;
     document.getElementById('prependString').value = settings.rows.prepend.settings.prependString;
     
     // Update UI based on settings
@@ -1043,6 +1241,42 @@ function updateRowVisibility() {
     if (copyLinksButton) {
       copyLinksButton.style.display = settings.rows.copyLinks.enabled ? 'flex' : 'none';
     }
+
+    // Update Group Tabs row visibility (includes both Group tabs and Randomize tabs buttons)
+    const groupTabsRow = document.querySelector('[aria-label="Tab management tools"]');
+    if (groupTabsRow) {
+      groupTabsRow.style.display = settings.rows.groupTabs.enabled ? 'flex' : 'none';
+    }
+
+    // Update Close Duplicates row visibility (includes both Close duplicates and Close selected duplicates buttons)
+    const closeDuplicatesRow = document.querySelector('[aria-label="Duplicate tabs tools"]');
+    if (closeDuplicatesRow) {
+      closeDuplicatesRow.style.display = settings.rows.closeDuplicates.enabled ? 'flex' : 'none';
+    }
+
+    // Update Copy Tabs row visibility (includes both Copy tabs and Copy selected tabs buttons)
+    const copyTabsRow = document.querySelector('[aria-label="Copy tabs tools"]');
+    if (copyTabsRow) {
+      copyTabsRow.style.display = settings.rows.copyTabs.enabled ? 'flex' : 'none';
+    }
+
+    // Update Save Session row visibility (includes both Save session and Show sessions buttons)
+    const saveSessionRow = document.querySelector('[aria-label="Session management tools"]');
+    if (saveSessionRow) {
+      saveSessionRow.style.display = settings.rows.saveSession.enabled ? 'flex' : 'none';
+    }
+
+    // Update Export/Import row visibility (includes both Export all tabs and Import tabs buttons)
+    const exportImportRow = document.querySelector('[aria-label="Export/Import tools"]');
+    if (exportImportRow) {
+      exportImportRow.style.display = settings.rows.exportImport.enabled ? 'flex' : 'none';
+    }
+
+    // Update Move Tabs to Window button visibility
+    const moveTabsToWindowButton = document.getElementById('moveTabsToWindow');
+    if (moveTabsToWindowButton) {
+      moveTabsToWindowButton.style.display = settings.rows.moveTabsToWindow.enabled ? 'flex' : 'none';
+    }
   } catch (error) {
     console.error('Error updating row visibility:', error);
   }
@@ -1059,6 +1293,12 @@ function showSettings() {
   document.getElementById('prependRowEnabled').checked = settings.rows.prepend.enabled;
   document.getElementById('urlInputEnabled').checked = settings.rows.urlInput.enabled;
   document.getElementById('copyLinksEnabled').checked = settings.rows.copyLinks.enabled;
+  document.getElementById('groupTabsEnabled').checked = settings.rows.groupTabs.enabled;
+  document.getElementById('closeDuplicatesEnabled').checked = settings.rows.closeDuplicates.enabled;
+  document.getElementById('copyTabsEnabled').checked = settings.rows.copyTabs.enabled;
+  document.getElementById('saveSessionEnabled').checked = settings.rows.saveSession.enabled;
+  document.getElementById('exportImportEnabled').checked = settings.rows.exportImport.enabled;
+  document.getElementById('moveTabsToWindowEnabled').checked = settings.rows.moveTabsToWindow.enabled;
   document.getElementById('prependString').value = settings.rows.prepend.settings.prependString;
   
   requestAnimationFrame(() => {
@@ -1298,6 +1538,10 @@ document.addEventListener('DOMContentLoaded', async function () {
   document.getElementById('saveSession').addEventListener('click', saveSession);
   document.getElementById('showSessions').addEventListener('click', showSessions);
   document.getElementById('closeOverlay').addEventListener('click', hideSessionsOverlay);
+
+  // Move tabs to window functionality
+  document.getElementById('moveTabsToWindow').addEventListener('click', showMoveTabsOverlay);
+  document.getElementById('closeMoveTabsOverlay').addEventListener('click', hideMoveTabsOverlay);
   
   // Handle click on Generate URL List button
   document.getElementById('generate').addEventListener('click', async function() {
@@ -1505,6 +1749,9 @@ document.addEventListener('DOMContentLoaded', async function () {
       case 'p':
         document.getElementById('showSettings').click();
         break;
+      case 'm':
+        document.getElementById('moveTabsToWindow').click();
+        break;
     }
   });
 
@@ -1556,6 +1803,36 @@ document.addEventListener('DOMContentLoaded', async function () {
 
   document.getElementById('copyLinksEnabled').addEventListener('change', function(e) {
     settings.rows.copyLinks.enabled = e.target.checked;
+    saveSettings();
+  });
+
+  document.getElementById('groupTabsEnabled').addEventListener('change', function(e) {
+    settings.rows.groupTabs.enabled = e.target.checked;
+    saveSettings();
+  });
+
+  document.getElementById('closeDuplicatesEnabled').addEventListener('change', function(e) {
+    settings.rows.closeDuplicates.enabled = e.target.checked;
+    saveSettings();
+  });
+
+  document.getElementById('copyTabsEnabled').addEventListener('change', function(e) {
+    settings.rows.copyTabs.enabled = e.target.checked;
+    saveSettings();
+  });
+
+  document.getElementById('saveSessionEnabled').addEventListener('change', function(e) {
+    settings.rows.saveSession.enabled = e.target.checked;
+    saveSettings();
+  });
+
+  document.getElementById('exportImportEnabled').addEventListener('change', function(e) {
+    settings.rows.exportImport.enabled = e.target.checked;
+    saveSettings();
+  });
+
+  document.getElementById('moveTabsToWindowEnabled').addEventListener('change', function(e) {
+    settings.rows.moveTabsToWindow.enabled = e.target.checked;
     saveSettings();
   });
 
