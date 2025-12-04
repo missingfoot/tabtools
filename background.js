@@ -1,4 +1,35 @@
 /**
+ * Update toolbar icon based on color scheme
+ */
+function setIconTheme(isDark) {
+  const folder = isDark ? 'dark' : 'light';
+  chrome.action.setIcon({
+    path: {
+      16: `images/${folder}/icon16.png`,
+      48: `images/${folder}/icon48.png`,
+      128: `images/${folder}/icon128.png`
+    }
+  });
+}
+
+// Load saved theme preference on startup
+chrome.runtime.onStartup.addListener(() => {
+  chrome.storage.local.get(['isDarkMode'], (result) => {
+    if (result.isDarkMode !== undefined) {
+      setIconTheme(result.isDarkMode);
+    }
+  });
+});
+
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.storage.local.get(['isDarkMode'], (result) => {
+    if (result.isDarkMode !== undefined) {
+      setIconTheme(result.isDarkMode);
+    }
+  });
+});
+
+/**
  * Helper function to download data as a file
  * @param {string} data - The content to be downloaded
  * @param {string} filename - The name of the file to be created
@@ -17,6 +48,13 @@ function downloadAsFile(data, filename) {
  * Main message listener for handling extension actions
  */
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === 'updateTheme') {
+    setIconTheme(request.isDark);
+    chrome.storage.local.set({ isDarkMode: request.isDark });
+    sendResponse({ success: true });
+    return false;
+  }
+
   if (request.action === 'generateURLList') {
     // Get all windows and their tabs
     chrome.windows.getAll({ populate: true }, (windows) => {

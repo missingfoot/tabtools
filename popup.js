@@ -4,6 +4,17 @@ const ERROR_FEEDBACK_TIMEOUT = 3000;
 // Regular expression for basic URL validation
 const URL_REGEX = /^(https?|ftp):\/\/([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/[^\s]*)?$/;
 
+// Detect and send system color scheme to background script
+(function updateIconTheme() {
+  const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  chrome.runtime.sendMessage({ action: 'updateTheme', isDark });
+
+  // Listen for theme changes while popup is open
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+    chrome.runtime.sendMessage({ action: 'updateTheme', isDark: e.matches });
+  });
+})();
+
 /**
  * Shows temporary feedback on a button after an action
  * @param {string} buttonId - The ID of the button to show feedback on
