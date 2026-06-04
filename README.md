@@ -1,87 +1,98 @@
 # Tab Tools
 
-A powerful Chrome extension for advanced tab management and organization.
+A powerful browser extension for advanced tab management and organization,
+available for both **Chrome** and **Firefox**.
+
+This repository contains both builds:
+
+| Folder | Browser | Notes |
+|--------|---------|-------|
+| [`tab_tools_chrome/`](tab_tools_chrome/) | Chrome (and Chromium) | Manifest V3, service-worker background |
+| [`tab_tools_firefox/`](tab_tools_firefox/) | Firefox 140+ | Manifest V3, event-page background |
+
+The two builds share the same popup UI and logic (`popup.html`, `popup.js`,
+`popup.css`). They differ only in `manifest.json` and `background.js` to suit
+each browser's extension platform.
 
 ## Features
 
-### Tab Management
-- **Group Tabs**: Automatically organize tabs by domain and subdomain
-- **Duplicate Management**: Identify and close duplicate tabs while preserving active tabs
-- **Tab Randomization**: Shuffle tab order within the current window
-- **Selected Tab Operations**: Perform actions on multiple selected tabs
+- **Group all tabs** — collect tabs into real browser tab groups, one titled,
+  colored, collapsed group per domain
+- **Group selected** — put the currently selected tabs into a single group
+- **Order tabs** — reorder tabs by domain and subdomain (no groups)
+- **Randomize tabs** — shuffle tab order in the current window
+- **Close duplicates** — close duplicate tabs (all or selected), keeping the active one
+- **Copy URLs** — copy all/selected tab URLs, optionally with a custom prefix
+- **Sessions** — save, restore, import, and export named tab sessions
+- **Export/Import** — back up all tabs and windows to JSON
+- **Copy page links** — extract every link from the current page
+- **Configurable UI** — show/hide feature rows from Settings
 
-### Session Management
-- **Save Sessions**: Store current window tabs as named sessions
-- **Restore Sessions**: Quickly reload saved tab configurations
-- **Import/Export**: Share sessions between browsers or backup your data
-- **Session Organization**: Name, manage, and organize saved sessions
+### Keyboard Shortcuts
 
-### URL Operations
-- **URL Copying**: Copy URLs from tabs with optional custom prefix
-- **Batch URL Opening**: Open multiple URLs in current or new window
-- **URL Extraction**: Extract all links from the current page
-- **URL Validation**: Secure URL handling with sanitization
+| Key | Action | Key | Action |
+|-----|--------|-----|--------|
+| `G` | Group all tabs | `A` | Copy all tab URLs |
+| `C` | Group selected tabs | `Q` | Copy all URLs with prefix |
+| `U` | Order tabs by domain | `S` | Copy selected tab URLs |
+| `R` | Randomize tabs | `X` | Copy selected URLs with prefix |
+| `D` | Close duplicates | `E` | Export tabs to JSON |
+| `F` | Close selected duplicates | `L` | Copy page links |
+| `V` | Save session | `O` | Open URLs |
+| `B` | Show sessions | `N` | Open URLs in new window |
+| `I` | Import tabs | `P` | Show settings |
 
-### Settings & Customization
-- **Configurable UI**: Show/hide features based on your needs
-- **Persistent Settings**: Your preferences are saved between sessions
-- **Custom Prefixes**: Add custom text before URLs when copying
-- **Keyboard Shortcuts**: Quick access to all major features
+---
 
-## Keyboard Shortcuts
-- `V` - Save current session
-- `B` - Show sessions
-- `G` - Group tabs
-- `R` - Randomize tabs
-- `D` - Close duplicates
-- `F` - Close selected duplicates
-- `A` - Copy all tab URLs
-- `Q` - Copy all tab URLs with prefix
-- `S` - Copy selected tab URLs
-- `X` - Copy selected tab URLs with prefix
-- `E` - Generate URL list
-- `L` - Copy page links
-- `O` - Open URLs
-- `N` - Open URLs in new window
-- `I` - Import tabs
-- `P` - Show settings
+## Chrome
 
-## Technical Details
+The Chrome build lives in [`tab_tools_chrome/`](tab_tools_chrome/). It uses a
+Manifest V3 service-worker background and the `chrome.tabGroups` API for grouping.
 
-### Security Features
-- Strong URL validation and sanitization
-- Secure handling of user data
-- Safe URL extraction and processing
+### Install (unpacked, for development)
 
-### Code Architecture
-- Event-driven architecture
-- Promise-based async operations
-- Modular function design
-- Comprehensive error handling
-- Clean UI feedback system
+1. Open `chrome://extensions/`
+2. Enable **Developer mode** (top-right toggle)
+3. Click **Load unpacked**
+4. Select the `tab_tools_chrome/` folder
 
-### Storage
-- Chrome storage API integration
-- Session persistence
-- Settings management
-- Import/Export capabilities
+### Publish
 
-## Best Practices
-- Well-documented code with JSDoc comments
-- Consistent error handling
-- Defensive programming
-- Modern JavaScript features
-- Clean and intuitive user interface
+Zip the **contents** of `tab_tools_chrome/` and upload to the
+[Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole).
 
-## Requirements
-- Google Chrome browser
-- Chrome Extensions enabled
+---
 
-## Installation
-1. Go to the [releases page](https://github.com/missingfoot/tabtools/releases)
-2. Download the latest source zip file
-3. Extract the zip file to a directory
-4. Open Chrome Extensions page (chrome://extensions/)
-5. Enable Developer Mode
-6. Load unpacked extension
-7. Select the extracted extension directory
+## Firefox
+
+The Firefox build lives in [`tab_tools_firefox/`](tab_tools_firefox/). It uses a
+Manifest V3 event-page background, a Blob-based download (Firefox doesn't allow
+`URL.createObjectURL` in Chrome-style service workers), and the same WebExtensions
+tab-groups API. Requires **Firefox 140+**.
+
+### Install (temporary, for development)
+
+1. Open `about:debugging#/runtime/this-firefox`
+2. Click **Load Temporary Add-on…**
+3. Select `tab_tools_firefox/manifest.json`
+
+Temporary add-ons are removed when Firefox restarts. For auto-reload during
+development, install [`web-ext`](https://github.com/mozilla/web-ext) and run
+`web-ext run` inside `tab_tools_firefox/`.
+
+### Publish
+
+Build a package and submit it to [addons.mozilla.org](https://addons.mozilla.org/developers/):
+
+```sh
+cd tab_tools_firefox
+web-ext lint     # validate
+web-ext build    # produces web-ext-artifacts/tab_tools-<version>.zip
+```
+
+---
+
+## Privacy
+
+Tab Tools works entirely locally and collects no data. See the `PRIVACY.md`
+file in each build folder for details.

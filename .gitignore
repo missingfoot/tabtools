@@ -1,0 +1,17 @@
+# Build output
+**/web-ext-artifacts/
+**/node_modules/
+
+# Store assets & archive (kept locally, not committed)
+/_Archive/
+/cover.png
+/marquee.png
+/promo.png
+/tab_tools.zip
+
+# Local tooling / editor config
+.claude/
+
+# OS cruft
+.DS_Store
+Thumbs.db

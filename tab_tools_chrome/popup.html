@@ -9,16 +9,38 @@
 <body>
   <!-- Main container for all buttons and inputs -->
   <div class="buttonList">
-    <!-- First row of buttons -->
-    <div class="list-button-array" role="toolbar" aria-label="Tab management tools">
-      <!-- Button to group tabs by URL -->
-      <button id="groupTabs" style="width: 100%;" aria-label="Group tabs by domain">
+    <!-- Grouping row: collect tabs into real Firefox tab groups -->
+    <div class="list-button-array" role="toolbar" aria-label="Tab grouping tools">
+      <!-- Button to group all tabs into real Firefox tab groups by domain -->
+      <button id="groupTabs" style="width: 100%;" aria-label="Group all tabs by domain">
         <div class="button-content-wrapper">
           <div style="display: flex; align-items: center; gap: 8px;">
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-group"><path d="M3 7V5c0-1.1.9-2 2-2h2"/><path d="M17 3h2c1.1 0 2 .9 2 2v2"/><path d="M21 17v2c0 1.1-.9 2-2 2h-2"/><path d="M7 21H5c-1.1 0-2-.9-2-2v-2"/><rect width="7" height="5" x="7" y="7" rx="1"/><rect width="7" height="5" x="10" y="12" rx="1"/></svg>
-            <span>Group tabs</span>
+            <span>Group all tabs</span>
           </div>
           <span class="keyboard-shortcut">G</span>
+        </div>
+      </button>
+      <!-- Button to group the currently selected tabs -->
+      <button id="groupSelectedTabs" class="icon-only" aria-label="Group selected tabs" title="Group selected tabs (C)">
+        <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 10c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2" stroke-opacity="0.3"/>
+          <path d="M10 16c-1.1 0-2-.9-2-2v-4c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2" stroke-opacity="0.3"/>
+          <rect width="8" height="8" x="14" y="14" rx="2"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Ordering row: reorder tabs by domain (no real groups) + randomize -->
+    <div class="list-button-array" role="toolbar" aria-label="Tab ordering tools">
+      <!-- Button to order tabs by domain -->
+      <button id="orderTabs" style="width: 100%;" aria-label="Order tabs by domain">
+        <div class="button-content-wrapper">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up-down"><path d="m21 16-4 4-4-4"/><path d="M17 20V4"/><path d="m3 8 4-4 4 4"/><path d="M7 4v16"/></svg>
+            <span>Order tabs</span>
+          </div>
+          <span class="keyboard-shortcut">U</span>
         </div>
       </button>
       <!-- Button to randomize tab order -->
@@ -167,6 +189,15 @@
               <span>Group tabs</span>
               <div class="toggle-switch">
                 <input type="checkbox" id="groupTabsEnabled">
+                <span class="toggle-slider"></span>
+              </div>
+            </label>
+          </div>
+          <div class="setting-item">
+            <label class="setting-label">
+              <span>Order tabs</span>
+              <div class="toggle-switch">
+                <input type="checkbox" id="orderTabsEnabled">
                 <span class="toggle-slider"></span>
               </div>
             </label>
