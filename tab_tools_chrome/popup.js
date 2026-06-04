@@ -167,16 +167,75 @@ async function handleError(error, buttonId, operation) {
   await showButtonFeedback(buttonId, operation, true);
 }
 
+// Common multi-label public suffixes (e.g. "co.uk") so we can find the real
+// registrable domain instead of mistaking "co.uk" for the domain itself.
+const MULTI_PART_TLDS = new Set([
+  'co.uk', 'org.uk', 'me.uk', 'ltd.uk', 'plc.uk', 'net.uk', 'sch.uk', 'ac.uk', 'gov.uk', 'nhs.uk',
+  'com.au', 'net.au', 'org.au', 'edu.au', 'gov.au', 'asn.au', 'id.au',
+  'co.jp', 'or.jp', 'ne.jp', 'ac.jp', 'go.jp', 'gr.jp', 'ad.jp', 'ed.jp', 'lg.jp',
+  'com.br', 'net.br', 'org.br', 'gov.br', 'edu.br',
+  'co.in', 'net.in', 'org.in', 'gen.in', 'firm.in', 'ind.in', 'gov.in', 'ac.in', 'edu.in', 'res.in',
+  'co.nz', 'net.nz', 'org.nz', 'govt.nz', 'ac.nz', 'school.nz', 'geek.nz', 'gen.nz',
+  'co.za', 'net.za', 'org.za', 'gov.za', 'ac.za',
+  'com.cn', 'net.cn', 'org.cn', 'gov.cn', 'edu.cn',
+  'co.kr', 'or.kr', 'ne.kr', 're.kr', 'pe.kr', 'go.kr', 'ac.kr',
+  'com.mx', 'com.tr', 'com.sg', 'com.hk', 'com.tw', 'com.my', 'com.ph', 'com.ar', 'com.co',
+  'co.id', 'co.il', 'co.ke', 'co.th', 'com.ua', 'com.ru', 'com.pl', 'com.pk', 'com.vn',
+  'com.sa', 'com.eg', 'com.ng', 'com.gh', 'com.bd', 'com.np'
+]);
+
 /**
- * Groups tabs by domain and subdomain
- * Maintains order within groups for better user experience
- * 
+ * Returns the registrable domain for a hostname, correctly handling multi-part
+ * suffixes. "www.youtube.com" -> "youtube.com", "some.thing.co.uk" -> "thing.co.uk".
+ * Returns null for empty hosts; bare IPs are returned unchanged.
+ */
+function getRegistrableDomain(hostname) {
+  if (!hostname) return null;
+  if (/^\d{1,3}(\.\d{1,3}){3}$/.test(hostname)) return hostname; // IPv4 address
+  const parts = hostname.split('.');
+  if (parts.length <= 1) return hostname; // localhost and similar single labels
+  const lastTwo = parts.slice(-2).join('.');
+  const suffixLen = MULTI_PART_TLDS.has(lastTwo) ? 2 : 1;
+  const startIndex = Math.max(0, parts.length - suffixLen - 1);
+  return parts.slice(startIndex).join('.');
+}
+
+/**
+ * The plain site name to use as a tab group label: just the main label of the
+ * registrable domain. "www.youtube.com" -> "youtube", "some.thing.co.uk" -> "thing".
+ */
+function getDomainLabel(registrableDomain) {
+  if (!registrableDomain) return 'other';
+  if (/^\d{1,3}(\.\d{1,3}){3}$/.test(registrableDomain)) return registrableDomain; // keep IPs whole
+  return registrableDomain.split('.')[0] || 'other';
+}
+
+/**
+ * Resolves a tab to its registrable domain key (used for bucketing).
+ * Falls back to "other" for tabs without a normal hostname (about:, file:, etc.).
+ */
+function getDomainKey(tab) {
+  try {
+    return getRegistrableDomain(new URL(tab.url).hostname) || 'other';
+  } catch (error) {
+    return 'other';
+  }
+}
+
+// Colors available to the Firefox tabGroups API, used to give each domain group
+// a distinct, stable color.
+const GROUP_COLORS = ['blue', 'cyan', 'green', 'yellow', 'orange', 'red', 'pink', 'purple', 'grey'];
+
+/**
+ * Orders tabs by domain and subdomain (visual ordering only, no real groups).
+ * Maintains order within groups for better user experience.
+ *
  * Process:
  * 1. Groups by base domain (e.g., example.com)
  * 2. Subgroups by subdomain (e.g., blog.example.com)
  * 3. Maintains original order within groups
  */
-async function groupTabs() {
+async function orderTabs() {
   try {
     const tabs = await chrome.tabs.query({ currentWindow: true });
     let groupedTabs = {};
@@ -211,9 +270,90 @@ async function groupTabs() {
       await chrome.tabs.move(newOrder[i].id, { index: i });
     }
 
-    await showButtonFeedback('groupTabs', 'Grouped!');
+    await showButtonFeedback('orderTabs', 'Ordered!');
+  } catch (error) {
+    console.error('Error ordering tabs:', error);
+    await handleError(error, 'orderTabs', 'Failed to order tabs');
+  }
+}
+
+/**
+ * Groups all tabs in the current window into real Firefox tab groups, one group
+ * per base domain, each titled and colored. Pinned tabs are left untouched.
+ */
+async function groupAllTabs() {
+  try {
+    // Feature detection: tab groups are only available in newer Firefox.
+    if (!chrome.tabs.group) {
+      await showButtonFeedback('groupTabs', 'Unsupported', true);
+      return;
+    }
+
+    const tabs = await chrome.tabs.query({ currentWindow: true, pinned: false });
+
+    // Bucket tabs by registrable domain (keeps e.g. example.com and example.org apart).
+    const byDomain = {};
+    for (const tab of tabs) {
+      const key = getDomainKey(tab);
+      (byDomain[key] ||= []).push(tab.id);
+    }
+
+    // Create a titled, colored group for each domain (sorted for stable colors).
+    const domains = Object.keys(byDomain).sort();
+    let groupCount = 0;
+    for (let i = 0; i < domains.length; i++) {
+      const domain = domains[i];
+      const tabIds = byDomain[domain];
+      const groupId = await chrome.tabs.group({ tabIds });
+      if (chrome.tabGroups) {
+        await chrome.tabGroups.update(groupId, {
+          title: getDomainLabel(domain),
+          color: GROUP_COLORS[i % GROUP_COLORS.length],
+          collapsed: true
+        });
+      }
+      groupCount++;
+    }
+
+    await showButtonFeedback('groupTabs', `${groupCount} groups`);
   } catch (error) {
     console.error('Error grouping tabs:', error);
+    await handleError(error, 'groupTabs', 'Failed to group tabs');
+  }
+}
+
+/**
+ * Groups the currently selected (highlighted) tabs into a single new tab group,
+ * titled by their shared domain when they all match.
+ */
+async function groupSelectedTabs() {
+  try {
+    if (!chrome.tabs.group) {
+      await showButtonFeedback('groupSelectedTabs', 'Unsupported', true);
+      return;
+    }
+
+    const selectedTabs = await chrome.tabs.query({ highlighted: true, currentWindow: true, pinned: false });
+
+    // Need at least two highlighted tabs — a single active tab isn't a selection.
+    if (selectedTabs.length < 2) {
+      await showButtonFeedback('groupSelectedTabs', 'Select tabs', true);
+      return;
+    }
+
+    const tabIds = selectedTabs.map(tab => tab.id);
+    const groupId = await chrome.tabs.group({ tabIds });
+
+    if (chrome.tabGroups) {
+      const domains = [...new Set(selectedTabs.map(getDomainKey))];
+      const title = domains.length === 1 ? getDomainLabel(domains[0]) : 'Group';
+      await chrome.tabGroups.update(groupId, { title, color: GROUP_COLORS[0], collapsed: true });
+    }
+
+    await showButtonFeedback('groupSelectedTabs', 'Grouped!');
+  } catch (error) {
+    console.error('Error grouping selected tabs:', error);
+    await handleError(error, 'groupSelectedTabs', 'Failed to group tabs');
   }
 }
 
@@ -1126,6 +1266,9 @@ const defaultSettings = {
     groupTabs: {
       enabled: true
     },
+    orderTabs: {
+      enabled: true
+    },
     closeDuplicates: {
       enabled: true
     },
@@ -1171,6 +1314,9 @@ async function loadSettings() {
           groupTabs: {
             enabled: result.settings.rows?.groupTabs?.enabled ?? defaultSettings.rows.groupTabs.enabled
           },
+          orderTabs: {
+            enabled: result.settings.rows?.orderTabs?.enabled ?? defaultSettings.rows.orderTabs.enabled
+          },
           closeDuplicates: {
             enabled: result.settings.rows?.closeDuplicates?.enabled ?? defaultSettings.rows.closeDuplicates.enabled
           },
@@ -1195,13 +1341,14 @@ async function loadSettings() {
     document.getElementById('urlInputEnabled').checked = settings.rows.urlInput.enabled;
     document.getElementById('copyLinksEnabled').checked = settings.rows.copyLinks.enabled;
     document.getElementById('groupTabsEnabled').checked = settings.rows.groupTabs.enabled;
+    document.getElementById('orderTabsEnabled').checked = settings.rows.orderTabs.enabled;
     document.getElementById('closeDuplicatesEnabled').checked = settings.rows.closeDuplicates.enabled;
     document.getElementById('copyTabsEnabled').checked = settings.rows.copyTabs.enabled;
     document.getElementById('saveSessionEnabled').checked = settings.rows.saveSession.enabled;
     document.getElementById('exportImportEnabled').checked = settings.rows.exportImport.enabled;
     document.getElementById('moveTabsToWindowEnabled').checked = settings.rows.moveTabsToWindow.enabled;
     document.getElementById('prependString').value = settings.rows.prepend.settings.prependString;
-    
+
     // Update UI based on settings
     updateRowVisibility();
   } catch (error) {
@@ -1253,10 +1400,16 @@ function updateRowVisibility() {
       copyLinksButton.style.display = settings.rows.copyLinks.enabled ? 'flex' : 'none';
     }
 
-    // Update Group Tabs row visibility (includes both Group tabs and Randomize tabs buttons)
-    const groupTabsRow = document.querySelector('[aria-label="Tab management tools"]');
+    // Update Grouping row visibility (Group all tabs + Group selected buttons)
+    const groupTabsRow = document.querySelector('[aria-label="Tab grouping tools"]');
     if (groupTabsRow) {
       groupTabsRow.style.display = settings.rows.groupTabs.enabled ? 'flex' : 'none';
+    }
+
+    // Update Ordering row visibility (Order tabs + Randomize buttons)
+    const orderTabsRow = document.querySelector('[aria-label="Tab ordering tools"]');
+    if (orderTabsRow) {
+      orderTabsRow.style.display = settings.rows.orderTabs.enabled ? 'flex' : 'none';
     }
 
     // Update Close Duplicates row visibility (includes both Close duplicates and Close selected duplicates buttons)
@@ -1305,6 +1458,7 @@ function showSettings() {
   document.getElementById('urlInputEnabled').checked = settings.rows.urlInput.enabled;
   document.getElementById('copyLinksEnabled').checked = settings.rows.copyLinks.enabled;
   document.getElementById('groupTabsEnabled').checked = settings.rows.groupTabs.enabled;
+  document.getElementById('orderTabsEnabled').checked = settings.rows.orderTabs.enabled;
   document.getElementById('closeDuplicatesEnabled').checked = settings.rows.closeDuplicates.enabled;
   document.getElementById('copyTabsEnabled').checked = settings.rows.copyTabs.enabled;
   document.getElementById('saveSessionEnabled').checked = settings.rows.saveSession.enabled;
@@ -1538,7 +1692,9 @@ async function clearSessions() {
 // Add event listeners when the DOM content is fully loaded
 document.addEventListener('DOMContentLoaded', async function () {
   // Attach click event listeners to buttons
-  document.getElementById('groupTabs').addEventListener('click', groupTabs);
+  document.getElementById('groupTabs').addEventListener('click', groupAllTabs);
+  document.getElementById('groupSelectedTabs').addEventListener('click', groupSelectedTabs);
+  document.getElementById('orderTabs').addEventListener('click', orderTabs);
   document.getElementById('closeDuplicates').addEventListener('click', closeDuplicates);
   document.getElementById('closeSelectedDuplicates').addEventListener('click', closeSelectedDuplicates);
   document.getElementById('copyTabURLs').addEventListener('click', copyTabURLs);
@@ -1721,6 +1877,12 @@ document.addEventListener('DOMContentLoaded', async function () {
       case 'g':
         document.getElementById('groupTabs').click();
         break;
+      case 'c':
+        document.getElementById('groupSelectedTabs').click();
+        break;
+      case 'u':
+        document.getElementById('orderTabs').click();
+        break;
       case 'r':
         document.getElementById('randomizeTabs').click();
         break;
@@ -1819,6 +1981,11 @@ document.addEventListener('DOMContentLoaded', async function () {
 
   document.getElementById('groupTabsEnabled').addEventListener('change', function(e) {
     settings.rows.groupTabs.enabled = e.target.checked;
+    saveSettings();
+  });
+
+  document.getElementById('orderTabsEnabled').addEventListener('change', function(e) {
+    settings.rows.orderTabs.enabled = e.target.checked;
     saveSettings();
   });
 

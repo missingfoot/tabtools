@@ -1,0 +1,7 @@
+# Normalize line endings to LF for text files
+* text=auto eol=lf
+
+# Treat images as binary
+*.png binary
+*.jpg binary
+*.zip binary
