@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Tab Tools",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "Powerful tab management tools: group, copy, organize, and manage your Firefox tabs efficiently with keyboard shortcuts and modern UI",
   "permissions": ["tabs", "tabGroups", "clipboardWrite", "downloads", "storage", "activeTab", "scripting"],
   "host_permissions": ["<all_urls>"],

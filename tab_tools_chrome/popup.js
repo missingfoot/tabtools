@@ -1055,7 +1055,19 @@ function attachSessionItemListeners(sessionItem, session, index) {
  */
 async function restoreSession(session) {
   try {
-    await chrome.windows.create({ url: session.urls });
+    // Only the first tab is loaded/activated; the rest are created in the
+    // background and immediately discarded so they sit unloaded (like
+    // Chrome's session restore) until the user clicks them.
+    const [firstUrl, ...restUrls] = session.urls;
+    const newWindow = await chrome.windows.create({ url: firstUrl });
+    await Promise.all(restUrls.map(async (url) => {
+      const tab = await chrome.tabs.create({ windowId: newWindow.id, url, active: false });
+      try {
+        await chrome.tabs.discard(tab.id);
+      } catch (e) {
+        // Discard can fail if the tab finished loading/closed too fast; ignore.
+      }
+    }));
     hideSessionsOverlay();
   } catch (error) {
     console.error('Error restoring session:', error);
@@ -1739,10 +1751,20 @@ document.addEventListener('DOMContentLoaded', async function () {
         return;
       }
 
-      // Open each valid URL in a new tab
-      const openPromises = validUrls.map(url => chrome.tabs.create({ url }));
-      await Promise.all(openPromises);
-      
+      // Open each valid URL in a new tab. Only the first tab is loaded/activated;
+      // the rest are created in the background and immediately discarded so they
+      // sit unloaded (like Chrome's session restore) until the user clicks them.
+      const [firstUrl, ...restUrls] = validUrls;
+      await chrome.tabs.create({ url: firstUrl });
+      await Promise.all(restUrls.map(async (url) => {
+        const tab = await chrome.tabs.create({ url, active: false });
+        try {
+          await chrome.tabs.discard(tab.id);
+        } catch (e) {
+          // Discard can fail if the tab finished loading/closed too fast; ignore.
+        }
+      }));
+
       await showButtonFeedback('openUrls', `Opened ${validUrls.length} tabs`);
     } catch (error) {
       console.error('Error opening URLs:', error);
@@ -1767,8 +1789,19 @@ document.addEventListener('DOMContentLoaded', async function () {
         return;
       }
 
-      // Create a new window with the valid URLs
-      await chrome.windows.create({ url: validUrls });
+      // Create a new window with just the first URL loaded, then add the rest
+      // as background tabs and immediately discard them so they stay unloaded
+      // (like Chrome's session restore) until the user clicks them.
+      const [firstUrl, ...restUrls] = validUrls;
+      const newWindow = await chrome.windows.create({ url: firstUrl });
+      await Promise.all(restUrls.map(async (url) => {
+        const tab = await chrome.tabs.create({ windowId: newWindow.id, url, active: false });
+        try {
+          await chrome.tabs.discard(tab.id);
+        } catch (e) {
+          // Discard can fail if the tab finished loading/closed too fast; ignore.
+        }
+      }));
       await showButtonFeedback('openUrlsInNewWindow', `Opened ${validUrls.length} tabs`);
     } catch (error) {
       console.error('Error opening URLs in new window:', error);
